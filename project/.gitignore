@@ -1,0 +1,47 @@
+# =====================
+# Python-related ignores
+# =====================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+*.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# PyInstaller
+*.spec
+build/
+dist/
+
+# Unit test / coverage reports
+.coverage
+*.cover
+htmlcov/
+.cache/
+.pytest_cache/
+
+# =====================
+# OS / Editor files
+# =====================
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# VSCode / PyCharm / JetBrains
+.vscode/
+.idea/
+*.iml
