@@ -1,0 +1,20 @@
+1. 1MTA_mean - High correlation (~0.30), high MI (~0.30), high RF (~0.11) - Best overall
+2. LL_mean - Highest correlation (~0.28), good MI (~0.27), high RF (~0.08)
+3. 1MTA_var - High correlation (~0.21), high MI (~0.13), moderate RF (~0.02)
+4. MT_calA_var - Near-zero correlation, highest MI (~0.17), moderate RF (~0.04)
+5. MT_calA_mean - Moderate correlation (~0.11), high MI (~0.11), low RF (~0.03)
+6. cal_PA_mean - Good correlation (~0.17), low MI (~0.02), high RF (~0.08)
+7. LL_var - High correlation (~0.19), low MI (~0.03), low RF (~0.02)
+8. 5MTCA_mean - Negative correlation (~-0.28), low MI (~0.02), high RF (~0.08)
+9. cal_PA_var - Good correlation (~0.15), very low MI, moderate RF (~0.04)
+10. MCL_var - High correlation (~0.12), very low MI, moderate RF (~0.03)
+11. TUA_mean - Low correlation (~0.03), moderate MI (~0.04), moderate RF (~0.05)
+12. MA_var - Negative correlation (~-0.14), very low MI, low RF (~0.02)
+13. MCL_mean - Near-zero correlation, moderate MI (~0.09), low RF (~0.02)
+14. TUA_var - Low correlation (~0.08), moderate MI (~0.04), low RF (~0.03)
+15. ML_var - Negative correlation (~-0.30), very low MI, very low RF
+16. ML_mean - Negative correlation (~-0.24), very low MI, moderate RF (~0.05)
+17. MA_mean - Negative correlation (~-0.14), very low MI, low RF (~0.02)
+18. 5MTCA_var - Negative correlation (~-0.28), very low MI, low RF
+19. TCA_mean - Low correlation (~0.08), very low MI, moderate RF (~0.04)
+20. TCA_var - Negative correlation (~-0.17), very low MI, high RF (~0.10)
