@@ -18,7 +18,7 @@ params = ['MCL_mean','MCL_var','1MTA_mean','1MTA_var','MT_calA_mean','MT_calA_va
 
 # -------------------------------
 # Create folder to save figure
-fig_folder = '../figs'
+fig_folder = '../figs/feature_clusters'
 os.makedirs(fig_folder, exist_ok=True)
 
 # -------------------------------
