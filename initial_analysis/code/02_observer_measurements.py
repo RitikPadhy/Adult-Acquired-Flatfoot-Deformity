@@ -46,7 +46,7 @@ os.makedirs("../figs/inter-observer-variation", exist_ok=True)
 os.makedirs("../figs/intra-observer-variation", exist_ok=True)
 
 # ===============================================================
-# INTER-OBSERVER COMBINED PLOT
+# INTER-OBSERVER COMBINED PLOT - T1
 # ===============================================================
 
 fig_inter, axes_inter = plt.subplots(
@@ -69,11 +69,38 @@ for i, prefix in enumerate(all_columns):
 
 plt.tight_layout()
 plt.suptitle("Bland–Altman: Inter-Observer Variation", fontsize=14, y=1.02)
-plt.savefig("../figs/inter-observer-variation/bland_altman_combined_inter.png", bbox_inches='tight')
+plt.savefig("../figs/inter-observer-variation/bland_altman_combined_inter_T1.png", bbox_inches='tight')
 plt.close(fig_inter)
 
 # ===============================================================
-# INTRA-OBSERVER COMBINED PLOT
+# INTER-OBSERVER COMBINED PLOT - T2
+# ===============================================================
+
+fig_inter, axes_inter = plt.subplots(
+    nrows=5, ncols=2, figsize=(10, 14)
+)
+axes_inter = axes_inter.flatten()
+
+for i, prefix in enumerate(all_columns):
+    try:
+        # Use T2 comparison (KP vs KT)
+        bland_altman_plot(
+            axes_inter[i],
+            df[f"{prefix}_12"],
+            df[f"{prefix}_22"],
+            f"{prefix} (T2: KP vs KT)"
+        )
+    except KeyError as e:
+        axes_inter[i].set_title(f"{prefix} - Missing", fontsize=9)
+        axes_inter[i].axis("off")
+
+plt.tight_layout()
+plt.suptitle("Bland–Altman: Inter-Observer Variation", fontsize=14, y=1.02)
+plt.savefig("../figs/inter-observer-variation/bland_altman_combined_inter_T2.png", bbox_inches='tight')
+plt.close(fig_inter)
+
+# ===============================================================
+# INTRA-OBSERVER COMBINED PLOT - KP
 # ===============================================================
 
 fig_intra, axes_intra = plt.subplots(
@@ -96,7 +123,34 @@ for i, prefix in enumerate(all_columns):
 
 plt.tight_layout()
 plt.suptitle("Bland–Altman: Intra-Observer Variation", fontsize=14, y=1.02)
-plt.savefig("../figs/intra-observer-variation/bland_altman_combined_intra.png", bbox_inches='tight')
+plt.savefig("../figs/intra-observer-variation/bland_altman_combined_intra_KP.png", bbox_inches='tight')
+plt.close(fig_intra)
+
+# ===============================================================
+# INTRA-OBSERVER COMBINED PLOT - KT
+# ===============================================================
+
+fig_intra, axes_intra = plt.subplots(
+    nrows=5, ncols=2, figsize=(10, 14)
+)
+axes_intra = axes_intra.flatten()
+
+for i, prefix in enumerate(all_columns):
+    try:
+        # Use KP (T1 vs T2) comparison
+        bland_altman_plot(
+            axes_intra[i],
+            df[f"{prefix}_21"],
+            df[f"{prefix}_22"],
+            f"{prefix} (KT: T1 vs T2)"
+        )
+    except KeyError as e:
+        axes_intra[i].set_title(f"{prefix} - Missing", fontsize=9)
+        axes_intra[i].axis("off")
+
+plt.tight_layout()
+plt.suptitle("Bland–Altman: Intra-Observer Variation", fontsize=14, y=1.02)
+plt.savefig("../figs/intra-observer-variation/bland_altman_combined_intra_KT.png", bbox_inches='tight')
 plt.close(fig_intra)
 
 print("✅ Combined inter- and intra-observer Bland–Altman plots saved successfully!")
