@@ -20,3 +20,6 @@ This project analyzes **Adult Acquired Flatfoot Deformity (AAFD)** using radiogr
 ## Goal
 To provide a **reproducible pipeline** for assessing AAFD from X-ray measurements and identifying the most important radiographic indicators.  
 This project is intended for **researchers and clinicians** to better understand and predict foot deformities.
+
+## Initial Analysis
+The folder named initial contains the initial analysis performed during the early exploration phase of the project. It includes preliminary data checks, baseline summaries, and first-round insights before the main analysis.
