@@ -23,3 +23,9 @@ This project is intended for **researchers and clinicians** to better understand
 
 ## Initial Analysis
 The folder named initial contains the initial analysis performed during the early exploration phase of the project. It includes preliminary data checks, baseline summaries, and first-round insights before the main analysis.
+
+## Second Analysis
+Second analysis takes the idea of removing the outliers which were obtained in the Bland–Altman plot
+
+## Third Analysis
+Third analysis takes the idea of working with the infra and intra measurements measured among the two professors at two different times. 
