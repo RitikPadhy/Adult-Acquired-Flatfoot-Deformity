@@ -87,7 +87,6 @@ rf_df = pd.DataFrame({'RF_Importance': rf_importances}, index=pure_features)
 # Combine all metrics into a single DataFrame
 # ---------------------------------------------------------------
 importance_df = pd.concat([corr_df, mi_df, rf_df], axis=1)
-importance_df = importance_df.sort_values(by='Mutual_Info', ascending=False)
 
 # ---------------------------------------------------------------
 # 4️⃣ Plot combined feature importance
