@@ -1,28 +1,24 @@
-# 🔑 Feature-Based Model Evaluation: Cluster + Importance Insights
-# This script evaluates Logistic Regression (optionally Random Forest) on feature subsets ranked
-# by combined cluster separation + importance (Correlation/MI/RF). It calculates classification metrics
-# (precision, recall, F1-score) and AUC, then saves results to CSV for analysis.
+# 🔑 Feature-Based Model Evaluation: Pure Features Only
+# OUTLIER cells in pure columns are ignored
+# ===============================================================
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, roc_auc_score
+import numpy as np
 
 # Load preprocessed radiographic data
 df = pd.read_csv('../results/CSV/radiographic_data_preprocessed.csv')
 
-# Features ranked by cluster separation + statistical/model importance
-ranked_features = [
-    'LL_mean', '1MTA_mean', 'cal_PA_mean', 'MT_calA_mean', 'ML_mean',
-    'MA_mean', 'TCA_mean', 'TUA_mean', '5MTCA_mean', 'MCL_mean',
-    'MCL_var', '1MTA_var', 'MT_calA_var', 'LL_var', 'cal_PA_var',
-    'MA_var', 'ML_var', '5MTCA_var', 'TUA_var', 'TCA_var'
-]
+# Select only pure columns
+pure_features = [col for col in df.columns if 'pure' in col.lower()]
+if len(pure_features) == 0:
+    raise ValueError("No 'pure' columns found in dataset.")
 
-# Prepare feature matrix and target
-X = df[ranked_features].fillna(df[ranked_features].median())
-y = df['AS_0S_1']
+# Feature matrix (pure columns only) and target
+X = df[pure_features]
+y = df['AS_0S_1']  # target
 
 # Train/test split
 X_train, X_test, y_train, y_test = train_test_split(
@@ -30,33 +26,43 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # Create incremental feature subsets: top 1, top 2, ..., full set
-feature_subsets = [ranked_features[:i] for i in range(1, len(ranked_features)+1)]
-
+feature_subsets = [pure_features[:i] for i in range(1, len(pure_features)+1)]
 results = []
 
-def evaluate_subset(features, model_type='LogisticRegression'):
-    """Evaluate a model on a given subset of features and store metrics."""
-    X_train_sub = X_train[features]
-    X_test_sub = X_test[features]
+def evaluate_subset(features):
+    """Evaluate Logistic Regression using only pure features, ignoring OUTLIERs."""
+    # Replace 'OUTLIER' with np.nan (compatible with float)
+    X_train_sub = X_train[features].replace("OUTLIER", np.nan).astype(float).copy()
+    X_test_sub = X_test[features].replace("OUTLIER", np.nan).astype(float).copy()
 
-    if model_type == 'LogisticRegression':
-        model = LogisticRegression(random_state=42, max_iter=1000)
-    elif model_type == 'RandomForest':
-        model = RandomForestClassifier(n_estimators=500, random_state=42)
-    else:
-        raise ValueError("Unsupported model type")
+    # Drop rows that are all NaN in this subset
+    X_train_sub_valid = X_train_sub.dropna(how='all')
+    y_train_sub = y_train.loc[X_train_sub_valid.index]
 
-    model.fit(X_train_sub, y_train)
-    y_pred = model.predict(X_test_sub)
-    y_proba = model.predict_proba(X_test_sub)[:, 1]
+    X_test_sub_valid = X_test_sub.dropna(how='all')
+    y_test_sub = y_test.loc[X_test_sub_valid.index]
 
-    # Compute metrics safely (handle classes with no predictions)
-    report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
-    auc = roc_auc_score(y_test, y_proba)
+    # Skip subset if only one class remains
+    if len(y_train_sub.unique()) < 2 or len(y_test_sub.unique()) < 2:
+        print(f"⚠️ Skipping subset {features} due to single-class problem")
+        return
+
+    # Fill remaining NaN with train median
+    X_train_sub_valid = X_train_sub_valid.fillna(X_train_sub_valid.median())
+    X_test_sub_valid = X_test_sub_valid.fillna(X_train_sub_valid.median())
+
+    # Train model
+    model = LogisticRegression(random_state=42, max_iter=1000)
+    model.fit(X_train_sub_valid, y_train_sub)
+    y_pred = model.predict(X_test_sub_valid)
+    y_proba = model.predict_proba(X_test_sub_valid)[:, 1]
+
+    # Metrics
+    report = classification_report(y_test_sub, y_pred, output_dict=True, zero_division=0)
+    auc = roc_auc_score(y_test_sub, y_proba)
 
     results.append({
         "Features": ", ".join(features),
-        "Model": model_type,
         "Precision (0)": round(report.get('0', {}).get('precision', 0), 3),
         "Recall (0)": round(report.get('0', {}).get('recall', 0), 3),
         "F1 (0)": round(report.get('0', {}).get('f1-score', 0), 3),
@@ -68,32 +74,17 @@ def evaluate_subset(features, model_type='LogisticRegression'):
         "AUC": round(auc, 3)
     })
 
-# Evaluate all subsets with Logistic Regression
+# Evaluate all subsets
 for subset in feature_subsets:
-    evaluate_subset(subset, model_type='LogisticRegression')
-
-# Optional: Evaluate with Random Forest as well
-# for subset in feature_subsets:
-#     evaluate_subset(subset, model_type='RandomForest')
+    evaluate_subset(subset)
 
 # Save results
 results_df = pd.DataFrame(results)
-results_df.to_csv('../results/model_evaluation_results.csv', index=False)
+results_df.to_csv('../results/model_evaluation_results_pure_only.csv', index=False)
 
-# -----------------------------
-# Generate GitHub Markdown Table
-# -----------------------------
-def df_to_markdown(df):
-    """Convert a DataFrame to a GitHub-friendly Markdown table."""
-    md = df.to_markdown(index=False)
-    return md
-
-md_table = df_to_markdown(results_df)
-print("\n📊 Markdown Table:\n")
-print(md_table)
-
-# Optional: Save Markdown table to file
-with open('../results/model_evaluation_results.md', 'w') as f:
+# Markdown table
+md_table = results_df.to_markdown(index=False)
+with open('../results/model_evaluation_results_pure_only.md', 'w') as f:
     f.write(md_table)
 
-print("✅ Evaluation completed. Results saved to CSV and Markdown")
+print("✅ Evaluation completed using only pure columns. Results saved to CSV and Markdown.")

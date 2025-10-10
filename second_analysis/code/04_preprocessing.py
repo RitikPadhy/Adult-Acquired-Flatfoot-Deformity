@@ -1,43 +1,53 @@
-# Handles missing values, standardizing/normalizing continuous radiographic features, encoding categorical variables, and saving the cleaned dataset for later use.
-# Results suggest preprocessing ran successfully
-
+# ===============================================================
+# Radiographic Data Preprocessing
+# Handles: normalization of pure numeric values only
+# OUTLIER cells are never touched, and all other columns remain intact
+# ===============================================================
 
 import pandas as pd
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
+import os
 
-# Load dataframe
-df = pd.read_csv('../results/CSV/radiographic_data_aggregated.csv')
+print("🔹 Starting data preprocessing (pure columns only)...")
 
-# ---------------------------
-# Handle missing values
-df = df[df.isnull().mean(axis=1) < 0.3]  # Drop rows with >30% missing
-df = df.fillna(df.median(numeric_only=True))  # Impute remaining with median
+# ---------------------------------------------------------------
+# Load cleaned dataset (after Bland–Altman filtering)
+# ---------------------------------------------------------------
+df = pd.read_csv('../results/CSV/radiographic_data_cleaned.csv')
 
-# ---------------------------
-# Standardize continuous features
-continuous_features = [
-    'MCL_mean', 'MCL_var', '1MTA_mean', '1MTA_var', 
-    'MT_calA_mean', 'MT_calA_var', 'ML_mean', 'ML_var', 
-    'MA_mean', 'MA_var', 'LL_mean', 'LL_var', 
-    '5MTCA_mean', '5MTCA_var', 'cal_PA_mean', 'cal_PA_var', 
-    'TUA_mean', 'TUA_var', 'TCA_mean', 'TCA_var'
-]
+# ---------------------------------------------------------------
+# Identify pure columns
+# ---------------------------------------------------------------
+pure_cols = [col for col in df.columns if 'pure' in col.lower()]
+print(f"📊 Pure columns detected: {len(pure_cols)} -> {pure_cols}")
 
-scaler = StandardScaler()
-df[continuous_features] = scaler.fit_transform(df[continuous_features])
+# ---------------------------------------------------------------
+# Normalize pure columns (ignore OUTLIER cells)
+# ---------------------------------------------------------------
+for col in pure_cols:
+    # Create a mask for numeric values only (exclude OUTLIER)
+    numeric_mask = pd.to_numeric(df[col], errors='coerce').notna()
+    
+    # Only normalize numeric entries
+    if numeric_mask.sum() > 0:
+        scaler = StandardScaler()
+        df.loc[numeric_mask, col] = scaler.fit_transform(df.loc[numeric_mask, [col]])
 
-# ---------------------------
-# Encode categorical features
-categorical_features = ['M_1 F_2', 'CMP_1A_2']  # Adjust columns as needed
-le = LabelEncoder()
-for col in categorical_features:
-    if col in df.columns:
-        df[col] = le.fit_transform(df[col])
+# ---------------------------------------------------------------
+# Save preprocessed dataset
+# ---------------------------------------------------------------
+os.makedirs('../results/CSV', exist_ok=True)
+os.makedirs('../results/Excel', exist_ok=True)
 
-# Save the preprocessed dataframe for later use
-df.to_csv('../results/CSV/radiographic_data_preprocessed.csv', index=False)
-print("Preprocessing completed and saved to radiographic_data_preprocessed.csv")
+csv_path = '../results/CSV/radiographic_data_preprocessed.csv'
+excel_path = '../results/Excel/radiographic_data_preprocessed.xlsx'
 
-# Save the preprocessed dataframe for later use
-df.to_excel('../results/Excel/radiographic_data_preprocessed.xlsx', index=False)
-print("Preprocessing completed and saved to radiographic_data_preprocessed.excel")
+df.to_csv(csv_path, index=False)
+df.to_excel(excel_path, index=False)
+
+# ---------------------------------------------------------------
+# Summary report
+# ---------------------------------------------------------------
+print("✅ Preprocessing completed successfully.")
+print(f"📁 Files saved:\n   - {csv_path}\n   - {excel_path}")
+print(f"ℹ️ Pure columns normalized (OUTLIER cells untouched): {pure_cols}")
