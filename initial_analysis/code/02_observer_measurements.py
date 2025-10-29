@@ -11,8 +11,13 @@ import os
 print("🔹 Step: Generating combined Bland–Altman plots...")
 
 # Load dataset
-df = pd.read_csv('../results/CSV/radiographic_data_aggregated.csv')
+data_path = '../data/dataset_with_target.xlsx'
 
+try:
+    df = pd.read_excel(data_path)
+    print(f"✅ Loaded dataset: {data_path} ({df.shape[0]} rows, {df.shape[1]} columns)")
+except Exception as e:
+    raise FileNotFoundError(f"❌ Could not read Excel file at {data_path}: {e}")
 # ===============================================================
 # Bland–Altman plotting helper
 # ===============================================================
